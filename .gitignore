@@ -1,0 +1,26 @@
+.env
+
+# IDE
+.idea/
+*.iml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual env (uv creates this)
+.venv/
+
+# Test/coverage/tools
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.coverage*
+htmlcov/
+
+# OS/editor junk
+.DS_Store
+Thumbs.db
+.vscode/
