@@ -3,7 +3,9 @@ name = "bewusstheitsuebung"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "google-genai>=1.33.0",
+]
 
 [dependency-groups]
 dev = [
