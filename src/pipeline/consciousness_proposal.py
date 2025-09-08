@@ -26,5 +26,6 @@ def get_consciousness_proposal(messages: List[str], model_name: str = DEFAULT_MO
     target_text = messages[-1].strip()
 
     chain = system_prompt | structured_llm
-    result: ConsciousnessProposal = chain.invoke({"context_text": context_text, "target_text": target_text})
+    raw = chain.invoke({"context_text": context_text, "target_text": target_text})
+    result = ConsciousnessProposal.model_validate(raw)
     return result
