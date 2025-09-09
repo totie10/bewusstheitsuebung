@@ -1,16 +1,22 @@
 import os
 from typing import List
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from pipeline.prompt import system_prompt
+from pipeline.prompt import prompt
 from pipeline.schema import ConsciousnessProposal
 
 DEFAULT_MODEL = "gemini-2.0-flash-lite-001"
 
 
-def get_consciousness_proposal(messages: List[str], model_name: str = DEFAULT_MODEL) -> ConsciousnessProposal:
+def get_consciousness_proposal(
+    messages: List[str],
+    model_name: str = DEFAULT_MODEL,
+    debug: bool = False,
+) -> ConsciousnessProposal:
     """
     Nutzt die gesamte Nachrichtenliste als Kontext, klassifiziert aber nur die letzte Nachricht.
+    Setze debug=True, um die exakt an das LLM gesendeten Prompt-Messages zu sehen.
     """
     if not messages:
         raise ValueError("Message list must not be empty")
@@ -25,7 +31,22 @@ def get_consciousness_proposal(messages: List[str], model_name: str = DEFAULT_MO
     context_text = "\n".join(f"- {m.strip()}" for m in messages[:-1])
     target_text = messages[-1].strip()
 
-    chain = system_prompt | structured_llm
+    # --- show exact prompt sent to the model ---
+    if debug:
+        formatted_msgs = prompt.format_messages(
+            context_text=context_text,
+            target_text=target_text,
+        )
+        print("\n====== PROMPT DEBUG (exact messages sent) ======")
+        for m in formatted_msgs:
+            # m.type is typically "system" / "human" / "ai"
+            print(f"\n--- {m.type.upper()} ---\n{m.content}")
+        print("====== END PROMPT DEBUG ======\n")
+
+    # run chain
+    chain = prompt | structured_llm
     raw = chain.invoke({"context_text": context_text, "target_text": target_text})
+
+    # ensure correct type (re-validate in case parser returns a dict/BaseModel)
     result = ConsciousnessProposal.model_validate(raw)
     return result

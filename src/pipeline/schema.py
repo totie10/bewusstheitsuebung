@@ -1,5 +1,6 @@
 from enum import Enum
-from typing import ClassVar, Dict, List
+from typing import Dict, List
+
 from pydantic import BaseModel, Field
 
 
@@ -43,6 +44,7 @@ BEWUSSTHEITSEBENE_BEISPIELE: Dict[str, List[str]] = {
         "Herz",
         "Kontraktion",
         "Krampf",
+        "Müdigkeit",
     ],
     Bewusstheitsebene.AUFREGUNG: [
         "Aufregung",
@@ -148,27 +150,19 @@ class ConsciousnessProposal(BaseModel):
 
     bewusstheitsebene: Bewusstheitsebene = Field(
         description=(
-            "Genau eine der sechs Klassen:\n"
-            "- gedanke: Kognitiver Inhalt/Selbstgespräch, Bewertungen, Planen, Analysieren "
-            "(z. B. „Ich schaffe das nicht“, „Das war dumm“, „Morgen muss ich früh raus“). "
-            "Beispiel-Keywords: " + ", ".join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEDANKE]) + "\n"
-            "- koerperempfindung: Unmittelbare körperliche Sensationen (Druck, Enge, Wärme/Kälte, "
-            "Kribbeln, Herzklopfen, Zittern, Anspannung) ohne Bewertung. "
-            "Beispiel-Keywords: " + ", ".join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.KOERPEREMPFINDUNG]) + "\n"
-            "- aufregung: Erhöhte innere Aktivierung/Erregung als Zustand (z. B. Nervosität, "
-            "Getriebensein, hektische Unruhe). Fokus auf dem **Erregungsniveau**, nicht auf einem "
-            "spezifischen Gefühl. Beispiel-Keywords: "
-            + ", ".join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.AUFREGUNG])
-            + "\n"
-            "- gefuehl: Emotionale Zustände (Traurigkeit, Freude, Angst, Wut, Scham, Schuld, "
-            "Erleichterung...). Meist als einzelnes Wort/kurze Wortgruppe. "
-            "Beispiel-Keywords: " + ", ".join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEFUEHL]) + "\n"
-            "- sinken: Abnehmende Aktivierung/Absacken/Schwere/Leere/„Down“-Gefühl (z. B. Erschöpfung, "
-            "inneres Wegsacken). Fokus auf **Niedrig-Arousal**. Beispiel-Keywords: "
-            + ", ".join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.SINKEN])
-            + "\n"
-            "- tiefere_erfahrung: Grundlegende Erlebnisqualität/Werte/Sinn/Verbundenheit/Präsenz "
-            "(z. B. Weite, Stille, Vertrauen, Dankbarkeit als Grundhaltung, Gefühl von Sinn). "
-            "Beispiel-Keywords: " + ", ".join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.TIEFERE_ERFAHRUNG])
+            f"Genau eine der sechs Klassen:\n"
+            f"- gedanke: Kognitive Inhalte, innere Sätze, Bewertungen, Planen, Vorstellungen oder Erinnerungen. "
+            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEDANKE])}\n"
+            f"- koerperempfindung: Wahrnehmbare körperliche Empfindungen und Signale. "
+            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.KOERPEREMPFINDUNG])}\n"
+            f"- aufregung: Erhöhte innere Aktivierung, Nervosität oder energetisches Aufgewühltsein. "
+            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.AUFREGUNG])}\n"
+            f"- gefuehl: Emotionale Zustände wie Freude, Schmerz, Heiterkeit, Trauer, Wut, Angst, Verzweiflung, Scham oder Ekel. "
+            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEFUEHL])}\n"
+            f"- sinken: Erleben von in die Tiefe sinken, Fallen, Absacken, Abwärtsbewegung, nicht-körperliche Enge oder Schwere. "
+            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.SINKEN])}\n"
+            f"- tiefere_erfahrung: Existenzielle oder spirituelle Qualitäten wie Tiefe, Ruhe, Leere, Stille, Frieden, "
+            f"bedingungslose Liebe, Glückseligkeit, Weite oder Verbundenheit. "
+            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.TIEFERE_ERFAHRUNG])}"
         )
     )

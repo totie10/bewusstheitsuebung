@@ -1,6 +1,17 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-SYSTEM_PROMPT = """\
+from pipeline.schema import ConsciousnessProposal
+
+
+def build_schema_description() -> str:
+    """Extract the field description from ConsciousnessProposal."""
+    desc = ConsciousnessProposal.model_fields["bewusstheitsebene"].description or ""
+    return "Strukturelle Spezifikation (Beschreibung der Klassen und Beispiele):\n" + desc
+
+
+beschreibung_bewusstheitsebenen = build_schema_description()
+
+SYSTEM_PROMPT = f"""\
 Du bist ein präziser Annotator.
 Du erhältst eine Liste von Nachrichten (Gesprächsverlauf).
 Die letzte Nachricht ist das Ziel, das du genau einer Bewusstheitsebene zuordnest.
@@ -35,6 +46,9 @@ die wiederum aus vielerlei Fantasien und Vorstellungen zusammengesetzt ist.
 
 Tiefere Erfahrungen: Tiefe, Ruhe, Leere, Stille, Frieden, bedingungslose Liebe und Glückseligkeit sind Erfahrungen,
 die tiefer sind, als Gefühle es je sein können.
+
+Hier sind weiter Details zu den einzelnen Bewusstheitsebenen:
+{beschreibung_bewusstheitsebenen}
 
 
 Regeln:
