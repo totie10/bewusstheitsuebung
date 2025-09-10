@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 from typing import List
 
 
@@ -11,51 +13,69 @@ def preprocess_dialogue(messages: List[str], include_all_messages: bool = False)
     If include_all_messages = True, keep messages with old format (no Nutzer or Agent)
     Returns a list of combined user message blocks.
     """
-    results = []
-    buffer = []
+    results: List[str] = []
+    buffer: List[str] = []
 
-    for msg in messages:
-        msg = msg.strip()
+    for raw in messages:
+        msg = raw.strip()
         if msg.startswith("Nutzer:"):
-            # remove prefix and collect
             text = msg.replace("Nutzer:", "", 1).strip()
             buffer.append(text)
         elif msg.startswith("Agent"):
-            # time to flush buffer if we collected Nutzer messages
             if buffer:
-                combined = "\n".join(buffer)
-                results.append(combined)
+                results.append("\n".join(buffer))
                 buffer = []
-            # skip the agent message (ignored)
         else:
-            # safety: treat as user text if format unexpected
             if include_all_messages:
                 results.append(msg)
             else:
                 break
 
-    # flush last buffer if any
     if buffer:
-        combined = "\n".join(buffer)
-        results.append(combined)
+        results.append("\n".join(buffer))
 
     return results
 
 
+def export_preprocessed_lists(in_path: Path, out_path: Path, include_all_messages: bool = False) -> None:
+    """
+    Loads the input JSON (a list of users),
+    extracts only the preprocessed nutzer dialogues (list of lists of strings),
+    and writes them to a new JSON file.
+    """
+    with in_path.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    all_dialogues: List[List[str]] = []
+
+    if not isinstance(data, list):
+        raise ValueError("Top-level JSON must be a list of user objects.")
+
+    for user in data:
+        usages = user.get("usage", [])
+        if not isinstance(usages, list) or len(usages) == 0:
+            continue
+
+        for u in usages:
+            if not isinstance(u, dict):
+                continue
+            nutzer_list = u.get("nutzer", [])
+            if not isinstance(nutzer_list, list) or len(nutzer_list) == 0:
+                continue
+
+            blocks = preprocess_dialogue(nutzer_list, include_all_messages)
+            if len(blocks) > 0:
+                all_dialogues.append(blocks)
+
+    with out_path.open("w", encoding="utf-8") as f:
+        json.dump(all_dialogues, f, ensure_ascii=False, indent=2)
+
+
 if __name__ == "__main__":
-    messages = [
-        "Nutzer: OK.",
-        "Agent nach 8 Sekunden: nichts",
-        "Nutzer: Ich kann Teiler meines K\u00f6rpers sp\u00fcren.",
-        "Nutzer: Mein Atem kommt und geht.",
-        "Agent nach 27 Sekunden: Koerpergefuehl",
-        "Nutzer: Gl\u00fcckseligkeit.",
-        "Nutzer: Ich bin Gl\u00fcckseligkeit.",
-        "Nutzer: Und da ist.",
-        "Nutzer: K\u00f6rper und Dinge.",
-        "Agent nach 35 Sekunden: tiefere Erfahrung",
-        "Nutzer: Ja, da gehen mehr Dinge durch den Kopf.",
-        "Agent nach 20 Sekunden: Koerpergefuehl",
-    ]
-    preprocessed_messages = preprocess_dialogue(messages)
-    print(preprocessed_messages)
+    for include_all_messages in [True, False]:
+        in_path = Path(r"C:\data\bewusstheitsuebung\20250910\users.json")
+        if include_all_messages:
+            out_path = in_path.parent / "preprocessed_users_all_messages.json"
+        else:
+            out_path = in_path.parent / "preprocessed_users.json"
+        export_preprocessed_lists(in_path, out_path, include_all_messages=include_all_messages)
