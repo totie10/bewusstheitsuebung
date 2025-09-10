@@ -4,9 +4,13 @@ from pipeline.schema import ConsciousnessProposal
 
 
 def build_schema_description() -> str:
-    """Extract the field description from ConsciousnessProposal."""
-    desc = ConsciousnessProposal.model_fields["bewusstheitsebene"].description or ""
-    return "Strukturelle Spezifikation (Beschreibung der Klassen und Beispiele):\n" + desc
+    """Erstellt eine textuelle Beschreibung aller Felder aus ConsciousnessProposal für das LLM."""
+    lines = ["Strukturelle Spezifikation (Beschreibung der Felder):\n"]
+    for name, field in ConsciousnessProposal.model_fields.items():
+        desc = field.description or ""
+        type_name = getattr(field.annotation, "__name__", str(field.annotation))
+        lines.append(f"- {name} ({type_name}):\n{desc}\n")
+    return "\n".join(lines)
 
 
 beschreibung_bewusstheitsebenen = build_schema_description()

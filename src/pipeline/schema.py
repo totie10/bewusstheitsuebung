@@ -141,16 +141,37 @@ BEWUSSTHEITSEBENE_BEISPIELE: Dict[str, List[str]] = {
     ],
 }
 
+TIEFE_PRIORITAET: List[Bewusstheitsebene] = [
+    Bewusstheitsebene.TIEFERE_ERFAHRUNG,  # am tiefsten
+    Bewusstheitsebene.SINKEN,
+    Bewusstheitsebene.GEFUEHL,
+    Bewusstheitsebene.AUFREGUNG,
+    Bewusstheitsebene.KOERPEREMPFINDUNG,
+    Bewusstheitsebene.GEDANKE,  # am "höchsten"/kognitivsten
+]
+
+DOMINANZ_REGELN = (
+    "Dominanz-Regeln (für Auswahl der einen dominanten Ebene):\n"
+    "1) Zuletzt Gesagtes hat höchstes Gewicht.\n"
+    f"2) Tiefere Ebene hat höheres Gewicht als eine höhere Ebene (Tiefe-Hierarchie: "
+    f"{', '.join(e.value for e in TIEFE_PRIORITAET)}).\n"
+    "3) Häufigkeit/Umfang: Die Ebene, aus der der größte Teil des Gesagten stammt, wiegt stärker.\n"
+    "Reihenfolge der Priorisierung: (1) zuletzt > (2) Tiefe > (3) Häufigkeit."
+)
+
 
 class ConsciousnessProposal(BaseModel):
     """
     Klassifikation der letzten Nachricht, basierend auf dem Gesprächskontext.
-    Genau EIN Wert im Enum 'Bewusstheitsebene'.
+    Genau EIN Wert im Enum 'Bewusstheitsebene' -> dominante Ebene.
+    Zusätzlich:
+      - weitere_bewusstheitsebenen: alle zusätzlich erkannten Ebenen (ohne die dominante)
+      - begruendung: kurze Begründung für Wahl der dominaten Ebene sowie der anderen Ebenen
     """
 
     bewusstheitsebene: Bewusstheitsebene = Field(
         description=(
-            f"Genau eine der sechs Klassen:\n"
+            f"Genau eine der sechs Klassen (dominant, siehe Dominanz-Regeln unten):\n"
             f"- gedanke: Kognitive Inhalte, innere Sätze, Bewertungen, Planen, Vorstellungen oder Erinnerungen. "
             f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEDANKE])}\n"
             f"- koerperempfindung: Wahrnehmbare körperliche Empfindungen und Signale. "
@@ -164,5 +185,20 @@ class ConsciousnessProposal(BaseModel):
             f"- tiefere_erfahrung: Existenzielle oder spirituelle Qualitäten wie Tiefe, Ruhe, Leere, Stille, Frieden, "
             f"bedingungslose Liebe, Glückseligkeit, Weite oder Verbundenheit. "
             f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.TIEFERE_ERFAHRUNG])}"
+            f"{DOMINANZ_REGELN}"
+        )
+    )
+    weitere_bewusstheitsebenen: List[Bewusstheitsebene] = Field(
+        default_factory=list,
+        description=("Alle zusätzlich genannten Ebenen (ohne die dominante). "),
+    )
+
+    begruendung: str = Field(
+        description=(
+            "Kurze Erläuterung (1–3 Sätze), wie die dominante Ebene und ggf. weitere Ebenen bestimmt wurden. "
+            "Dabei soll erkennbar sein, welche Textstellen zur Zuordnung geführt haben "
+            "(z. B. 'Ich bin wütend' → Bewusstheitsebene gefuehl: Wut). "
+            "Beziehe dich, falls mehrere Ebenen erkannt werden, auch auf (1) das zuletzt Gesagte, "
+            "(2) die Tiefe-Hierarchie und (3) die Häufigkeit."
         )
     )
