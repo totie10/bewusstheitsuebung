@@ -11,6 +11,18 @@ class Bewusstheitsebene(str, Enum):
     GEFUEHL = "gefuehl"
     SINKEN = "sinken"
     TIEFERE_ERFAHRUNG = "tiefere_erfahrung"
+    UNKLAR = "unklar"
+
+
+MAPPING_BEWUSSTHEITSEBENE = {
+    "Denken und Sinne": Bewusstheitsebene.GEDANKE,
+    "Koerpergefuehl": Bewusstheitsebene.KOERPEREMPFINDUNG,
+    "Unruhe/ Ruhe": Bewusstheitsebene.AUFREGUNG,
+    "Gefuehl": Bewusstheitsebene.GEFUEHL,
+    "Fallen": Bewusstheitsebene.SINKEN,
+    "tiefere Erfahrung": Bewusstheitsebene.TIEFERE_ERFAHRUNG,
+    "nichts": Bewusstheitsebene.UNKLAR,
+}
 
 
 BEWUSSTHEITSEBENE_BEISPIELE: Dict[str, List[str]] = {
@@ -170,7 +182,7 @@ class ConsciousnessProposal(BaseModel):
 
     bewusstheitsebene: Bewusstheitsebene = Field(
         description=(
-            f"Genau eine der sechs Klassen (dominant, siehe Dominanz-Regeln unten):\n"
+            f"Genau eine der sieben Klassen (dominant, siehe Dominanz-Regeln unten):\n"
             f"- gedanke: Kognitive Inhalte, innere Sätze, Bewertungen, Planen, Vorstellungen oder Erinnerungen. "
             f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEDANKE])}\n"
             f"- koerperempfindung: Wahrnehmbare körperliche Empfindungen und Signale. "
@@ -184,6 +196,8 @@ class ConsciousnessProposal(BaseModel):
             f"- tiefere_erfahrung: Existenzielle oder spirituelle Qualitäten wie Tiefe, Ruhe, Leere, Stille, Frieden, "
             f"bedingungslose Liebe, Glückseligkeit, Weite oder Verbundenheit. "
             f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.TIEFERE_ERFAHRUNG])}"
+            f"- unklar: Die komplette Beschreibung ist so ungenau oder unverständlich, dass die Klassifikation in eine"
+            f"der sechs oberen Bewusstheitsebenen nicht möglich ist. "
             f"{DOMINANZ_REGELN}"
         )
     )
@@ -197,3 +211,8 @@ class ConsciousnessProposal(BaseModel):
             "(2) die Tiefe-Hierarchie und (3) die Häufigkeit."
         )
     )
+
+
+class ConsciousnessMessage(BaseModel):
+    text: str
+    vorhergesagte_bewusstheitsebene: Bewusstheitsebene

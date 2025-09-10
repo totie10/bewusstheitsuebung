@@ -2,8 +2,10 @@ import json
 from pathlib import Path
 from typing import List
 
+from pipeline.schema import ConsciousnessMessage, MAPPING_BEWUSSTHEITSEBENE
 
-def preprocess_dialogue(messages: List[str], include_all_messages: bool = False) -> List[str]:
+
+def preprocess_dialogue(messages: List[str]) -> List[ConsciousnessMessage]:
     """
     Preprocess dialogue:
     - Combine consecutive 'Nutzer:' messages until the next 'Agent...'
@@ -13,7 +15,7 @@ def preprocess_dialogue(messages: List[str], include_all_messages: bool = False)
     If include_all_messages = True, keep messages with old format (no Nutzer or Agent)
     Returns a list of combined user message blocks.
     """
-    results: List[str] = []
+    results: List[ConsciousnessMessage] = []
     buffer: List[str] = []
 
     for raw in messages:
@@ -23,21 +25,19 @@ def preprocess_dialogue(messages: List[str], include_all_messages: bool = False)
             buffer.append(text)
         elif msg.startswith("Agent"):
             if buffer:
-                results.append("\n".join(buffer))
+                consciousness_message = ConsciousnessMessage(
+                    text="\n".join(buffer),
+                    vorhergesagte_bewusstheitsebene=MAPPING_BEWUSSTHEITSEBENE[msg.split(": ")[1]],
+                )
+                results.append(consciousness_message)
                 buffer = []
         else:
-            if include_all_messages:
-                results.append(msg)
-            else:
-                break
-
-    if buffer:
-        results.append("\n".join(buffer))
+            break
 
     return results
 
 
-def export_preprocessed_lists(in_path: Path, out_path: Path, include_all_messages: bool = False) -> None:
+def export_preprocessed_lists(in_path: Path, out_path: Path) -> None:
     """
     Loads the input JSON (a list of users),
     extracts only the preprocessed nutzer dialogues (list of lists of strings),
@@ -46,7 +46,7 @@ def export_preprocessed_lists(in_path: Path, out_path: Path, include_all_message
     with in_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
-    all_dialogues: List[List[str]] = []
+    all_dialogues: List[List[ConsciousnessMessage]] = []
 
     if not isinstance(data, list):
         raise ValueError("Top-level JSON must be a list of user objects.")
@@ -63,19 +63,20 @@ def export_preprocessed_lists(in_path: Path, out_path: Path, include_all_message
             if not isinstance(nutzer_list, list) or len(nutzer_list) == 0:
                 continue
 
-            blocks = preprocess_dialogue(nutzer_list, include_all_messages)
+            blocks = preprocess_dialogue(nutzer_list)
             if len(blocks) > 0:
                 all_dialogues.append(blocks)
 
     with out_path.open("w", encoding="utf-8") as f:
-        json.dump(all_dialogues, f, ensure_ascii=False, indent=2)
+        json.dump(
+            [[m.model_dump(mode="json") for m in dialogue] for dialogue in all_dialogues],
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
 
 
 if __name__ == "__main__":
-    for include_all_messages in [True, False]:
-        in_path = Path(r"C:\data\bewusstheitsuebung\20250910\users.json")
-        if include_all_messages:
-            out_path = in_path.parent / "preprocessed_users_all_messages.json"
-        else:
-            out_path = in_path.parent / "preprocessed_users.json"
-        export_preprocessed_lists(in_path, out_path, include_all_messages=include_all_messages)
+    in_path = Path(r"C:\data\bewusstheitsuebung\20250910\users.json")
+    out_path = in_path.parent / "preprocessed_users.json"
+    export_preprocessed_lists(in_path, out_path)

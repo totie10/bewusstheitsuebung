@@ -21,7 +21,7 @@ Du erhältst eine Liste von Nachrichten (Gesprächsverlauf).
 Die letzte Nachricht ist das Ziel, das du genau einer Bewusstheitsebene zuordnest.
 
 Wähle genau **eine** der Klassen:
-gedanke, koerperempfindung, aufregung, gefuehl, sinken, tiefere_erfahrung.
+gedanke, koerperempfindung, aufregung, gefuehl, sinken, tiefere_erfahrung, unklar.
 
 Gefühle sind etwas anderes als Körperempfindungen. Körperempfindungen sind: den Energiestrom zu spüren, den Herzschlag,
 den Atem sowie alles, was im und am Körper spürbar ist, wie ein Vibrieren, Jucken, Pochen, den Wind auf der Haut,
