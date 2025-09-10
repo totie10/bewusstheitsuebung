@@ -166,7 +166,8 @@ DOMINANZ_REGELN = (
     "Dominanz-Regeln (für Auswahl der einen dominanten Ebene):\n"
     "1) Zuletzt Gesagtes hat höchstes Gewicht.\n"
     f"2) Tiefere Ebene hat höheres Gewicht als eine höhere Ebene (Tiefe-Hierarchie: "
-    f"{', '.join(e.value for e in TIEFE_PRIORITAET)}).\n"
+    f"Die höchste Bewusstheitsebene sind die Gedanken. Die tiefste Bewusstheitsebene sind die tieferen Erfahrungen. "
+    f"Somit gilt für die Priorität: {' > '.join(e.value for e in TIEFE_PRIORITAET)}).\n"
     "3) Häufigkeit/Umfang: Die Ebene, aus der der größte Teil des Gesagten stammt, wiegt stärker.\n"
     "Reihenfolge der Priorisierung: (1) zuletzt > (2) Tiefe > (3) Häufigkeit."
 )
@@ -218,6 +219,14 @@ class ConsciousnessMessage(BaseModel):
     vorhergesagte_bewusstheitsebene: Bewusstheitsebene
 
 
+class ConsciousnessSample(BaseModel):
+    username: str
+    timestamp: str
+    consciousness_messages: List[ConsciousnessMessage]
+
+
 class ConsciousnessPrediction(ConsciousnessMessage):
+    username: str
+    timestamp: str
     context: List[str]
     vorhergesagte_bewusstheitsebene_dev: ConsciousnessProposal
