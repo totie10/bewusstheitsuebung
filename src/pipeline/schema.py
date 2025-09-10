@@ -216,3 +216,8 @@ class ConsciousnessProposal(BaseModel):
 class ConsciousnessMessage(BaseModel):
     text: str
     vorhergesagte_bewusstheitsebene: Bewusstheitsebene
+
+
+class ConsciousnessPrediction(ConsciousnessMessage):
+    context: List[str]
+    vorhergesagte_bewusstheitsebene_dev: ConsciousnessProposal

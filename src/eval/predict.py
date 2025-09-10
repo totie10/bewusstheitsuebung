@@ -1,0 +1,43 @@
+import json
+from pathlib import Path
+from typing import List
+
+from pipeline.consciousness_proposal import get_consciousness_proposal
+from pipeline.schema import ConsciousnessMessage, ConsciousnessPrediction
+
+
+def run_dataset(in_path: Path, out_path: Path, debug: bool = False) -> None:
+    """
+    Load the dataset JSON (list of lists), run predictions,
+    and write results to a separate JSON file.
+    """
+    # Read
+    with in_path.open("r", encoding="utf-8") as f:
+        all_dialogues = json.load(f)
+    all_dialogues = [[ConsciousnessMessage(**m) for m in dialogue] for dialogue in all_dialogues]
+
+    consciousness_predictions: List[ConsciousnessPrediction] = []
+    for dialogue in all_dialogues:
+        context: List[str] = []
+        for message in dialogue:
+            vorhergesagte_bewusstheitsebene_dev = get_consciousness_proposal(messages=context + [message.text])
+            consciousness_predictions.append(
+                ConsciousnessPrediction(
+                    text=message.text,
+                    vorhergesagte_bewusstheitsebene=message.vorhergesagte_bewusstheitsebene,
+                    context=context,
+                    vorhergesagte_bewusstheitsebene_dev=vorhergesagte_bewusstheitsebene_dev,
+                )
+            )
+            context.append(message.text)
+
+        # Write
+        with out_path.open("w", encoding="utf-8") as f:
+            json.dump([cp.model_dump(mode="json") for cp in consciousness_predictions], f, ensure_ascii=False, indent=2)
+
+
+if __name__ == "__main__":
+    in_path = Path(r"C:\data\bewusstheitsuebung\20250910\preprocessed_users.json")
+    out_path = in_path.parent / "predicted_users.json"
+    run_dataset(in_path, out_path, debug=True)
+    print(f"Predictions written to: {out_path}")
