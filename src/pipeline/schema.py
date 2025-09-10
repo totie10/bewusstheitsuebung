@@ -165,8 +165,7 @@ class ConsciousnessProposal(BaseModel):
     Klassifikation der letzten Nachricht, basierend auf dem Gesprächskontext.
     Genau EIN Wert im Enum 'Bewusstheitsebene' -> dominante Ebene.
     Zusätzlich:
-      - weitere_bewusstheitsebenen: alle zusätzlich erkannten Ebenen (ohne die dominante)
-      - begruendung: kurze Begründung für Wahl der dominaten Ebene sowie der anderen Ebenen
+      - begruendung: kurze Begründung für Wahl der dominaten Ebene
     """
 
     bewusstheitsebene: Bewusstheitsebene = Field(
@@ -188,14 +187,10 @@ class ConsciousnessProposal(BaseModel):
             f"{DOMINANZ_REGELN}"
         )
     )
-    weitere_bewusstheitsebenen: List[Bewusstheitsebene] = Field(
-        default_factory=list,
-        description=("Alle zusätzlich genannten Ebenen (ohne die dominante). "),
-    )
 
     begruendung: str = Field(
         description=(
-            "Kurze Erläuterung (1–3 Sätze), wie die dominante Ebene und ggf. weitere Ebenen bestimmt wurden. "
+            "Kurze Erläuterung (1–3 Sätze), wie die dominante Ebene bestimmt wurde. "
             "Dabei soll erkennbar sein, welche Textstellen zur Zuordnung geführt haben "
             "(z. B. 'Ich bin wütend' → Bewusstheitsebene gefuehl: Wut). "
             "Beziehe dich, falls mehrere Ebenen erkannt werden, auch auf (1) das zuletzt Gesagte, "
