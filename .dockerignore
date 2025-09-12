@@ -1,0 +1,42 @@
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Test & tooling
+.pytest_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+.dist-info/
+.build/
+.eggs/
+*.egg-info/
+
+# Git
+.git/
+.gitignore
+
+# Editors & OS
+*.swp
+*.swo
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Node / frontend (if any)
+node_modules/
+dist/
+build/
+
+# CI artifacts
+*.log

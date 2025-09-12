@@ -2,7 +2,7 @@
 name = "bewusstheitsuebung"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = "==3.13"
+requires-python = "==3.13.*"
 dependencies = [
     "fastapi~=0.116.1",
     "uvicorn[standard]~=0.30",
