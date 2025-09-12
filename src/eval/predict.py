@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import List
 
-from pipeline.consciousness_proposal import get_consciousness_proposal
+from pipeline.classify import classify_consciousness_level
 from pipeline.schema import ConsciousnessPrediction, ConsciousnessSample
 
 
@@ -20,7 +20,7 @@ def run_dataset(in_path: Path, out_path: Path) -> None:
     for dialogue in all_dialogues:
         context: List[str] = []
         for message in dialogue.consciousness_messages:
-            vorhergesagte_bewusstheitsebene_dev = get_consciousness_proposal(
+            vorhergesagte_bewusstheitsebene_dev = classify_consciousness_level(
                 messages=context + [message.text], debug=False
             )
             consciousness_predictions.append(

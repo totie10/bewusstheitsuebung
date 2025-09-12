@@ -4,16 +4,16 @@ from typing import List
 from langchain_google_genai import ChatGoogleGenerativeAI
 
 from pipeline.prompt import prompt
-from pipeline.schema import ConsciousnessProposal
+from pipeline.schema import ConsciousnessLevel
 
 DEFAULT_MODEL = "gemini-2.0-flash-lite-001"
 
 
-def get_consciousness_proposal(
+def classify_consciousness_level(
     messages: List[str],
     model_name: str = DEFAULT_MODEL,
     debug: bool = False,
-) -> ConsciousnessProposal:
+) -> ConsciousnessLevel:
     """
     Nutzt die gesamte Nachrichtenliste als Kontext, klassifiziert aber nur die letzte Nachricht.
     Setze debug=True, um die exakt an das LLM gesendeten Prompt-Messages zu sehen.
@@ -26,7 +26,7 @@ def get_consciousness_proposal(
         raise RuntimeError("GOOGLE_API_KEY is not set")
 
     llm = ChatGoogleGenerativeAI(model=model_name, api_key=api_key)
-    structured_llm = llm.with_structured_output(ConsciousnessProposal)
+    structured_llm = llm.with_structured_output(ConsciousnessLevel)
 
     context_text = "\n".join(f"- {m.strip()}" for m in messages[:-1])
     target_text = messages[-1].strip()
@@ -48,5 +48,5 @@ def get_consciousness_proposal(
     raw = chain.invoke({"context_text": context_text, "target_text": target_text})
 
     # ensure correct type (re-validate in case parser returns a dict/BaseModel)
-    result = ConsciousnessProposal.model_validate(raw)
+    result = ConsciousnessLevel.model_validate(raw)
     return result

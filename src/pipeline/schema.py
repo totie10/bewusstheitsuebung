@@ -173,7 +173,7 @@ DOMINANZ_REGELN = (
 )
 
 
-class ConsciousnessProposal(BaseModel):
+class ConsciousnessLevel(BaseModel):
     """
     Klassifikation der letzten Nachricht, basierend auf dem Gesprächskontext.
     Genau EIN Wert im Enum 'Bewusstheitsebene' -> dominante Ebene.
@@ -229,4 +229,4 @@ class ConsciousnessPrediction(ConsciousnessMessage):
     username: str
     timestamp: str
     context: List[str]
-    vorhergesagte_bewusstheitsebene_dev: ConsciousnessProposal
+    vorhergesagte_bewusstheitsebene_dev: ConsciousnessLevel

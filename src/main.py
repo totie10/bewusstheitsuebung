@@ -1,9 +1,10 @@
-from pipeline.consciousness_proposal import get_consciousness_proposal
+from pipeline.classify import classify_consciousness_level
 
 if __name__ == "__main__":
     msgs = [
-        "Nutzer: Mein Herz schl\u00e4gt. Nutzer: Und. Nutzer: Ich bin. Nutzer: \u00c4ngstlich.",
-        "Nutzer: \u00c4ngstlich. Nutzer: Ich denke.",
+        "OK.",
+        "Ich kann Teiler meines Körpers spüren.\nMein Atem kommt und geht.",
+        "Glückseligkeit.\nIch bin Glückseligkeit.\nUnd da ist.\nKörper und Dinge.",
     ]
-    res = get_consciousness_proposal(msgs, debug=True)
+    res = classify_consciousness_level(msgs, debug=True)
     print(res.model_dump(mode="json"))
