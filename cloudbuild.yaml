@@ -1,0 +1,32 @@
+substitutions:
+  _REGION: europe-west3
+  _REPO: cr-repo
+  _IMAGE: bewusst-api
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -euo pipefail
+        TS=$(date +%Y%m%d-%H%M%S)
+        IMAGE_URI="${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_IMAGE}"
+
+        echo "Building ${IMAGE_URI}:${TS} and ${IMAGE_URI}:latest from ./src"
+
+        docker build \
+          -f src/Dockerfile \
+          -t "${IMAGE_URI}:${TS}" \
+          -t "${IMAGE_URI}:latest" \
+          ./src
+
+        docker push "${IMAGE_URI}:${TS}"
+        docker push "${IMAGE_URI}:latest"
+
+        echo "Pushed:"
+        echo "  ${IMAGE_URI}:${TS}"
+        echo "  ${IMAGE_URI}:latest"
+
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_IMAGE}:latest'
