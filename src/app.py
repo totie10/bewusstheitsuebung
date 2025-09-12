@@ -2,12 +2,22 @@ import logging
 from typing import List
 
 from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from pipeline.classify import classify_consciousness_level
 from pipeline.schema import ConsciousnessLevel
 
 app = FastAPI(title="Bewusstheitsuebung API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://bewusstheit.org"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 logger = logging.getLogger("uvicorn.error")  # uses Uvicorn's logger
 
 
