@@ -74,3 +74,23 @@ gcloud run deploy bewusst-api \
   --set-env-vars MAX_BODY_BYTES=200000 \
   --set-env-vars CACHE_CONTROL="no-store"
 ```
+
+## 5) Build & Push with Cloud Build (Windows CMD, using `:latest` tag)
+
+If you're on **Windows CMD** and want the simplest way to build and push your container, just use a `:latest` tag — no timestamps needed.
+
+```cmd
+:: 1) Set the region (optional if always the same)
+set REGION=europe-west3
+set GOOGLE_CLOUD_PROJECT=bewusstheitsuebung-api
+
+:: 2) Build and push using a simple 'latest' tag
+gcloud builds submit src --tag "%REGION%-docker.pkg.dev/%GOOGLE_CLOUD_PROJECT%/cr-repo/bewusst-api:latest"
+```
+✅ What this does:
+
+Uses src/Dockerfile automatically (because the build context is src/).
+
+Builds the container image and tags it as :latest.
+
+Pushes the image to your Artifact Registry repository (cr-repo).
