@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import List
 
 from fastapi import FastAPI, HTTPException, status
@@ -10,13 +11,17 @@ from pipeline.schema import ConsciousnessLevel
 
 app = FastAPI(title="Bewusstheitsuebung API")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://bewusstheit.org"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+allowed_origins = os.getenv("ALLOW_ORIGINS")  # semicolon-separated list
+
+if allowed_origins:
+    origin_list = [origin.strip() for origin in allowed_origins.split(";") if origin.strip()]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origin_list,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
 logger = logging.getLogger("uvicorn.error")  # uses Uvicorn's logger
 
