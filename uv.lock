@@ -33,6 +33,7 @@ dependencies = [
     { name = "google-genai" },
     { name = "langchain" },
     { name = "langchain-google-genai" },
+    { name = "logging" },
     { name = "pydantic" },
 ]
 
@@ -44,10 +45,11 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", specifier = ">=0.116.1" },
+    { name = "fastapi", specifier = "~=0.116.1" },
     { name = "google-genai", specifier = "~=1.33.0" },
     { name = "langchain", specifier = "~=0.3.27" },
     { name = "langchain-google-genai", specifier = "~=2.1.10" },
+    { name = "logging", specifier = ">=0.4.9.6" },
     { name = "pydantic", specifier = "~=2.11.7" },
 ]
 
@@ -473,6 +475,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/62/6f/7d88228b7614fa020
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2d/26/99bc52e1c47fb4b995aece85a5313349a5e2559e4143ee2345d8bd1446ff/langsmith-0.4.27-py3-none-any.whl", hash = "sha256:23708e6478d1c74ac0e428bbc92df6704993e34305fb62a0c64d2fefc35bd67f", size = 384752, upload-time = "2025-09-08T19:01:47.362Z" },
 ]
+
+[[package]]
+name = "logging"
+version = "0.4.9.6"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/93/4b/979db9e44be09f71e85c9c8cfc42f258adfb7d93ce01deed2788b2948919/logging-0.4.9.6.tar.gz", hash = "sha256:26f6b50773f085042d301085bd1bf5d9f3735704db9f37c1ce6d8b85c38f2417", size = 96029, upload-time = "2013-06-04T23:43:22.086Z" }
 
 [[package]]
 name = "mypy-extensions"
