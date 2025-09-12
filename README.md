@@ -56,3 +56,21 @@ This secret will later be mounted into the Cloud Run container as an environment
 ```
 
 We’ll push the container here via Cloud Build.
+
+## 4) Security Layer in FastAPI
+```bash
+gcloud run deploy bewusst-api \
+  --image "$IMAGE" \
+  --set-secrets GOOGLE_API_KEY=GOOGLE_API_KEY:latest \
+  --set-env-vars ALLOW_ORIGINS="https://www.bewusstheitsuebung.de" \
+  --set-env-vars ALLOW_HOSTS="www.bewusstheitsuebung.de" \
+  --set-env-vars ENABLE_HTTPS_REDIRECT=true \
+  --set-env-vars ENABLE_SECURITY_HEADERS=true \
+  --set-env-vars HSTS_MAX_AGE=31536000,HSTS_INCLUDE_SUBDOMAINS=true,HSTS_PRELOAD=false \
+  --set-env-vars REFERRER_POLICY="no-referrer" \
+  --set-env-vars PERMISSIONS_POLICY="geolocation=(), microphone=(), camera=(), payment=()" \
+  --set-env-vars X_FRAME_OPTIONS=DENY \
+  --set-env-vars CONTENT_SECURITY_POLICY="default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none';" \
+  --set-env-vars MAX_BODY_BYTES=200000 \
+  --set-env-vars CACHE_CONTROL="no-store"
+```
