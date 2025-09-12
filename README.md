@@ -86,7 +86,7 @@ set GOOGLE_CLOUD_PROJECT=bewusstheitsuebung-api
 ```
 2) Build and push using a simple 'latest' tag
 ```cmd
-gcloud builds submit src --tag "%REGION%-docker.pkg.dev/%GOOGLE_CLOUD_PROJECT%/cr-repo/bewusst-api:latest"
+gcloud builds submit . --tag "%REGION%-docker.pkg.dev/%GOOGLE_CLOUD_PROJECT%/cr-repo/bewusst-api:latest"
 ```
 ✅ What this does:
 

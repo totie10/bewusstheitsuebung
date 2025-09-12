@@ -6,16 +6,17 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends curl build-essential \
  && rm -rf /var/lib/apt/lists/*
 
-# Install uv
+# Install uv into /usr/local/bin (not under /root)
+ENV UV_INSTALL_DIR=/usr/local/bin
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-ENV PATH="/root/.local/bin:${PATH}"
 
-# Dedicated venv outside /app (safer on Cloud Run)
+# Create dedicated venv outside /app (safer on Cloud Run)
 ENV VENV=/opt/venv
 RUN python -m venv "$VENV"
-ENV PATH="$VENV/bin:${PATH}"
 
-# Build context lives at repo root; keep WORKDIR at /app so uv finds pyproject
+# Set PATH once, explicitly (no ${PATH} placeholders)
+ENV PATH="/opt/venv/bin:/usr/local/bin:/usr/local/sbin:/usr/sbin:/usr/bin:/sbin:/bin"
+
 WORKDIR /app
 
 # Install deps (lockfile-first if present) into /opt/venv
@@ -24,14 +25,14 @@ RUN uv pip install --no-cache-dir -U pip \
  && (uv sync --python="$VENV/bin/python" --frozen --no-dev \
      || uv sync --python="$VENV/bin/python" --no-dev)
 
-# Copy source code from repo's src/ into /app/src
+# Copy source from repo's src/ into /app/src
 COPY src/ /app/src
 
 # Non-root user & permissions
 RUN useradd -m appuser && chown -R appuser:appuser /app /opt/venv
 USER appuser
 
-# Make /app/src importable as top-level (so imports don't need the "src." prefix)
+# Make /app/src importable as top-level (since your IDE treats src as project root)
 ENV PYTHONPATH=/app/src \
     PORT=8080 \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -39,5 +40,5 @@ ENV PYTHONPATH=/app/src \
 EXPOSE 8080
 
 # Start via uv run; $PORT expands via shell form
-# Adjust "app:app" to your ASGI path (e.g., "main:app" if src/main.py defines app)
+# Adjust module path if needed (e.g., "main:app" or "app.main:app")
 CMD ["/bin/sh","-lc","uv run --python $VENV/bin/python --frozen --no-dev uvicorn app:app --host 0.0.0.0 --port ${PORT:-8080}"]
