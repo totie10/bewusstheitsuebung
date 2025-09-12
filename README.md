@@ -79,12 +79,13 @@ gcloud run deploy bewusst-api \
 
 If you're on **Windows CMD** and want the simplest way to build and push your container, just use a `:latest` tag — no timestamps needed.
 
+1) Set the region (optional if always the same)
 ```cmd
-:: 1) Set the region (optional if always the same)
 set REGION=europe-west3
 set GOOGLE_CLOUD_PROJECT=bewusstheitsuebung-api
-
-:: 2) Build and push using a simple 'latest' tag
+```
+2) Build and push using a simple 'latest' tag
+```cmd
 gcloud builds submit src --tag "%REGION%-docker.pkg.dev/%GOOGLE_CLOUD_PROJECT%/cr-repo/bewusst-api:latest"
 ```
 ✅ What this does:
@@ -94,3 +95,60 @@ Uses src/Dockerfile automatically (because the build context is src/).
 Builds the container image and tags it as :latest.
 
 Pushes the image to your Artifact Registry repository (cr-repo).
+
+europe-west3-docker.pkg.dev/bewusstheitsuebung-api/cr-repo/bewusst-api:latest
+
+## 6) Deploy
+### 🔐 Create and Configure a Dedicated Service Account for Cloud Run
+
+For better security, run your Cloud Run service under a **dedicated service account** with **least-privilege access** to your secrets.
+
+#### 1️⃣ Create the Service Account
+
+Run these commands in **Windows CMD** (or PowerShell):
+
+```cmd
+set PROJECT_ID=bewusstheitsuebung-api
+set REGION=europe-west3
+set RUN_SA=run-bewusst-sa
+
+gcloud iam service-accounts create %RUN_SA% ^
+  --display-name "Cloud Run SA for bewusst-api"
+```
+The resulting service account email will be: 
+```cmd
+%RUN_SA%@%PROJECT_ID%.iam.gserviceaccount.com
+```
+
+#### 2️⃣ Grant Secret Manager Access (Least Privilege)
+
+Give this service account permission to read the GOOGLE_API_KEY secret.
+
+```cmd
+gcloud secrets add-iam-policy-binding GOOGLE_API_KEY ^
+  --member="serviceAccount:%RUN_SA%@%PROJECT_ID%.iam.gserviceaccount.com" ^
+  --role="roles/secretmanager.secretAccessor"
+```
+
+✅ What this does:
+
+Grants roles/secretmanager.secretAccessor only for the GOOGLE_API_KEY secret.
+
+Ensures your Cloud Run service can read the secret at runtime.
+
+Reduces blast radius by avoiding overly broad project-wide permissions.
+
+#### Deploy
+```cmd
+gcloud run deploy bewusst-api --image "%REGION%-docker.pkg.dev/%GOOGLE_CLOUD_PROJECT%/cr-repo/bewusst-api:latest" --region %REGION% --no-allow-unauthenticated --set-secrets GOOGLE_API_KEY=GOOGLE_API_KEY:latest --set-env-vars ALLOW_ORIGINS="https://www.bewusstheitsuebung.de" --set-env-vars ALLOW_HOSTS="www.bewusstheitsuebung.de" --set-env-vars ENABLE_HTTPS_REDIRECT=true --set-env-vars ENABLE_SECURITY_HEADERS=true --set-env-vars HSTS_MAX_AGE=31536000,HSTS_INCLUDE_SUBDOMAINS=true,HSTS_PRELOAD=false --set-env-vars REFERRER_POLICY="no-referrer" --set-env-vars PERMISSIONS_POLICY="geolocation=(), microphone=(), camera=(), payment=()" --set-env-vars X_FRAME_OPTIONS=DENY --set-env-vars CONTENT_SECURITY_POLICY="default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none';" --set-env-vars MAX_BODY_BYTES=200000 --set-env-vars CACHE_CONTROL="no-store"
+```
+
+### Debugging
+List revisions:
+```cmd
+gcloud run revisions list --service bewusst-api --region europe-west3
+```
+
+See logs under:\
+https://console.cloud.google.com/logs/viewer?project=bewusstheitsuebung-api&resource=cloud_run_revision/service_name/bewusst-api/revision_name/bewusst-api-00002-wdj
+
