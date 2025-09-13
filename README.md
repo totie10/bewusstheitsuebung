@@ -152,3 +152,38 @@ gcloud run revisions list --service bewusst-api --region europe-west3
 See logs under:\
 https://console.cloud.google.com/logs/viewer?project=bewusstheitsuebung-api&resource=cloud_run_revision/service_name/bewusst-api/revision_name/bewusst-api-00002-wdj
 
+## 🔑 Local Authentication & Testing (Private Cloud Run)
+
+Because our Cloud Run service is **not public** (`--no-allow-unauthenticated`),  
+you must authenticate locally and attach a valid **OIDC token** to each request.
+
+### 1️⃣ Authenticate Locally (Once Per Machine)
+
+Run:
+
+```cmd
+gcloud auth application-default login
+```
+
+You will be redirected to a Google sign-in page.
+
+✅ On the consent screen, select only:
+
+☑ Google Cloud-Daten abrufen, bearbeiten, konfigurieren und löschen sowie die E-Mail-Adresse Ihres Google-Kontos sehen
+
+This grants access to Google Cloud APIs and lets google-auth fetch identity tokens.
+You do not need the checkbox for Cloud SQL unless your code uses Cloud SQL.
+
+After login, verify:
+```cmd
+gcloud auth application-default print-access-token
+```
+You should see a long token string — this confirms ADC (Application Default Credentials) is set up.
+
+### 2️⃣ Grant Yourself Invoker Access (Once)
+```cmd
+gcloud run services add-iam-policy-binding bewusst-api \
+  --region europe-west3 \
+  --member="user:YOUR_EMAIL" \
+  --role="roles/run.invoker"
+```

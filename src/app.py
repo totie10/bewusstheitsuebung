@@ -5,7 +5,6 @@ from typing import List
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.responses import Response
 
@@ -38,14 +37,6 @@ allowed_hosts = os.getenv("ALLOW_HOSTS")
 if allowed_hosts:
     hosts_list = [h.strip() for h in allowed_hosts.split(";") if h.strip()]
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts_list)
-
-# =========================
-# HTTPS redirect (optional)
-# =========================
-# In Cloud Run + API Gateway you’ll be on HTTPS, but this is safe to keep.
-ENABLE_HTTPS_REDIRECT = os.getenv("ENABLE_HTTPS_REDIRECT", "true").lower() == "true"
-if ENABLE_HTTPS_REDIRECT:
-    app.add_middleware(HTTPSRedirectMiddleware)
 
 # =========================
 # Security headers (env-driven)
@@ -145,7 +136,6 @@ def healthz_headers():
         "Content-Security-Policy": CONTENT_SECURITY_POLICY if ENABLE_SECURITY_HEADERS else None,
         "CORS_ALLOW_ORIGINS": [o.strip() for o in (allowed_origins or "").split(";") if o.strip()],
         "TRUSTED_HOSTS": [h.strip() for h in (allowed_hosts or "").split(";") if h.strip()],
-        "HTTPS_redirect_enabled": ENABLE_HTTPS_REDIRECT,
         "MAX_BODY_BYTES": MAX_BODY_BYTES,
         "Cache-Control": CACHE_CONTROL or None,
     }

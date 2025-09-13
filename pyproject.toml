@@ -10,6 +10,7 @@ dependencies = [
     "langchain~=0.3.27",
     "langchain-google-genai~=2.1.10",
     "pydantic~=2.11.7",
+    "google-auth>=2.40.3",
 ]
 
 [dependency-groups]
