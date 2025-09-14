@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import List
 
@@ -7,6 +8,7 @@ from pipeline.prompt import prompt
 from pipeline.schema import ConsciousnessLevel
 
 DEFAULT_MODEL = "gemini-2.0-flash-lite-001"
+logger = logging.getLogger("uvicorn.error")  # shows up in Cloud Run logs
 
 
 def classify_consciousness_level(
@@ -18,6 +20,7 @@ def classify_consciousness_level(
     Nutzt die gesamte Nachrichtenliste als Kontext, klassifiziert aber nur die letzte Nachricht.
     Setze debug=True, um die exakt an das LLM gesendeten Prompt-Messages zu sehen.
     """
+    logger.info("Start classify")
     if not messages:
         raise ValueError("Message list must not be empty")
 
