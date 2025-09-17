@@ -110,7 +110,7 @@ Run these commands in **Windows CMD** (or PowerShell):
 ```cmd
 set PROJECT_ID=bewusstheitsuebung-api
 set REGION=europe-west3
-set RUN_SA=run-bewusst-sa
+set RUN_SA=api-client
 
 gcloud iam service-accounts create %RUN_SA% ^
   --display-name "Cloud Run SA for bewusst-api"
@@ -124,10 +124,8 @@ The resulting service account email will be:
 
 Give this service account permission to read the GOOGLE_API_KEY secret.
 
-```cmd
-gcloud secrets add-iam-policy-binding GOOGLE_API_KEY ^
-  --member="serviceAccount:%RUN_SA%@%PROJECT_ID%.iam.gserviceaccount.com" ^
-  --role="roles/secretmanager.secretAccessor"
+```cmd 
+gcloud secrets add-iam-policy-binding GOOGLE_API_KEY --member="serviceAccount:api-client@bewusstheitsuebung-api.iam.gserviceaccount.com" --role="roles/secretmanager.secretAccessor" --project="bewusstheitsuebung-api
 ```
 
 ✅ What this does:
@@ -140,7 +138,7 @@ Reduces blast radius by avoiding overly broad project-wide permissions.
 
 #### Deploy
 ```cmd
-gcloud run deploy bewusst-api --image "%REGION%-docker.pkg.dev/%GOOGLE_CLOUD_PROJECT%/cr-repo/bewusst-api:latest" --region %REGION% --no-allow-unauthenticated --service-account "%RUN_SA%@%PROJECT_ID%.iam.gserviceaccount.com" --set-secrets GOOGLE_API_KEY=GOOGLE_API_KEY:latest --set-env-vars ALLOW_ORIGINS="https://www.bewusstheitsuebung.de" --set-env-vars ALLOW_HOSTS="www.bewusstheitsuebung.de" --set-env-vars ENABLE_SECURITY_HEADERS=true --set-env-vars HSTS_MAX_AGE=31536000,HSTS_INCLUDE_SUBDOMAINS=true,HSTS_PRELOAD=false --set-env-vars REFERRER_POLICY="no-referrer" --set-env-vars PERMISSIONS_POLICY="geolocation=(), microphone=(), camera=(), payment=()" --set-env-vars X_FRAME_OPTIONS=DENY --set-env-vars CONTENT_SECURITY_POLICY="default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none';" --set-env-vars MAX_BODY_BYTES=200000 --set-env-vars CACHE_CONTROL="no-store"
+gcloud run deploy bewusst-api --image "%REGION%-docker.pkg.dev/%GOOGLE_CLOUD_PROJECT%/cr-repo/bewusst-api:latest" --region %REGION% --no-allow-unauthenticated --service-account "api-client@bewusstheitsuebung-api.iam.gserviceaccount.com" --set-secrets GOOGLE_API_KEY=GOOGLE_API_KEY:latest
 ```
 
 ### Debugging
@@ -187,3 +185,27 @@ gcloud run services add-iam-policy-binding bewusst-api \
   --member="user:YOUR_EMAIL" \
   --role="roles/run.invoker"
 ```
+
+### Assign Invoker rights to Service Account
+Run this command:
+```cmd
+gcloud run services add-iam-policy-binding bewusst-api --member="serviceAccount:api-client@bewusstheitsuebung-api.iam.gserviceaccount.com" --role="roles/run.invoker" --region="europe-west3" --project="bewusstheitsuebung-api"
+```
+Verify that it worked:
+```
+gcloud run services get-iam-policy bewusst-api --region="europe-west3" --project="bewusstheitsuebung-api"
+```
+
+### JSON-Schlüssel erzeugen und herunterladen
+In der Liste auf das neu erstellte Dienstkonto (Service Account) klicken.
+
+Tab SCHLÜSSEL öffnen.
+
+Schlüssel hinzufügen → Neuen Schlüssel erstellen.
+
+JSON wählen → Erstellen.
+
+Die Datei wird heruntergeladen (z. B. api-client-<…>.json).
+Sicherheit: Diese Datei ist ein Geheimnis. Nicht ins Repository committen, Dateirechte einschränken.
+
+Du kannst die Datei z. B. auf deinem Server als /opt/keys/api-client.json speichern.
