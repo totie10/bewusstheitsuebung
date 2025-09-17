@@ -1,7 +1,8 @@
 import logging
 from typing import List
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from pipeline.classify import classify_consciousness_level
@@ -9,6 +10,12 @@ from pipeline.schema import ConsciousnessLevel
 
 app = FastAPI(title="Bewusstheitsuebung API")
 logger = logging.getLogger("uvicorn.error")  # Uvicorn's logger
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "internal_error"})
 
 
 # =========================

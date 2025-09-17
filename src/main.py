@@ -1,6 +1,17 @@
-import requests
+import os
+
+from google.auth.transport.requests import AuthorizedSession
+from google.oauth2 import service_account
 
 BASE_URL = "https://bewusst-api-222811362718.europe-west3.run.app"
+AUDIENCE = BASE_URL
+KEY_FILE = os.environ.get("KEY_FILE")  # path to your downloaded key
+
+creds = service_account.IDTokenCredentials.from_service_account_file(
+    KEY_FILE,
+    target_audience=AUDIENCE,
+)
+authed = AuthorizedSession(creds)
 
 payload = {
     "messages": [
@@ -10,9 +21,7 @@ payload = {
     ]
 }
 
-# Just send a POST request — no auth headers needed
-res = requests.post(f"{BASE_URL}/classify", json=payload, timeout=2)
-
+res = authed.post(f"{BASE_URL}/classify", json=payload, timeout=10)
 if res.status_code == 200:
     print("✅ Success!")
     print(res.json())
