@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 from typing import List
 
-from pipeline.classify import classify_consciousness_level
-from pipeline.schema import ConsciousnessPrediction, ConsciousnessSample
+from pipelines.classify_consciousness_level.classify import classify_consciousness_level
+from pipelines.schema import ConsciousnessPrediction, ConsciousnessSample
 
 
 def run_dataset(in_path: Path, out_path: Path) -> None:

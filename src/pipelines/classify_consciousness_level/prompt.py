@@ -1,6 +1,6 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-from pipeline.schema import ConsciousnessLevel
+from pipelines.schema import ConsciousnessLevel
 
 
 def build_schema_description() -> str:

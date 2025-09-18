@@ -5,8 +5,8 @@ from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
-from pipeline.classify import classify_consciousness_level
-from pipeline.schema import ConsciousnessLevel
+from pipelines.classify_consciousness_level.classify import classify_consciousness_level
+from pipelines.schema import ConsciousnessLevel
 
 app = FastAPI(title="Bewusstheitsuebung API")
 logger = logging.getLogger("uvicorn.error")  # Uvicorn's logger

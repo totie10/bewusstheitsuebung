@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import List
 
-from pipeline.schema import ConsciousnessMessage, MAPPING_BEWUSSTHEITSEBENE, ConsciousnessSample
+from pipelines.schema import ConsciousnessMessage, MAPPING_BEWUSSTHEITSEBENE, ConsciousnessSample
 
 
 def preprocess_dialogue(messages: List[str]) -> List[ConsciousnessMessage]:

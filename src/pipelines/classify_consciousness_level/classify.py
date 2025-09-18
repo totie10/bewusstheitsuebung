@@ -4,8 +4,8 @@ from typing import List
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from pipeline.prompt import prompt
-from pipeline.schema import ConsciousnessLevel
+from pipelines.classify_consciousness_level.prompt import prompt
+from pipelines.schema import ConsciousnessLevel
 
 DEFAULT_MODEL = "gemini-2.0-flash-lite-001"
 logger = logging.getLogger("uvicorn.error")  # shows up in Cloud Run logs
