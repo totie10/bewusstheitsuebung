@@ -11,17 +11,17 @@ DEFAULT_MODEL = "gemini-2.0-flash-lite-001"
 logger = logging.getLogger("uvicorn.error")  # shows up in Cloud Run logs
 
 
-def format_proposal_options(proposal_options: dict[int, str]) -> str:
+def format_proposal_options(proposal_options: dict[str, str]) -> str:
     """Erzeugt eine klar lesbare Liste für das LLM."""
     lines = []
     for k, v in sorted(proposal_options.items(), key=lambda x: x[0]):
-        lines.append(f"{k}. {v}")
+        lines.append(f"{k}: {v}")
     return "\n".join(lines)
 
 
 def make_consciousness_proposal(
     messages: List[Dict[str, str]],
-    proposal_options: Dict[int, str],
+    proposal_options: Dict[str, str],
     time_period: TimePeriod,
     model_name: str = DEFAULT_MODEL,
     debug: bool = False,
@@ -69,17 +69,21 @@ if __name__ == "__main__":
     messages = [
         {"role": "user", "content": "Ich kann Teile meines Körpers spüren.\nMein Atem kommt und geht."},
         {"role": "assistant", "content": "koerperempfindung"},
-        {"role": "assistant", "content": "Und du brauchst nichts damit zu tun."},
+        {"role": "assistant", "content": "e1-2: Und du brauchst nichts damit zu tun."},
         {"role": "user", "content": "Glückseligkeit.\nIch bin Glückseligkeit.\nUnd da ist.\nKörper und Dinge."},
         {"role": "assistant", "content": "tiefere_erfahrung"},
-        {"role": "assistant", "content": "Und vielleicht kannst du schauen, wie tief die Erfahrung ist."},
+        {
+            "role": "assistant",
+            "content": "e3-5: Und du kannst schauen was geschieht, wenn du bei der Glückseligkeit bleibst.",
+        },
         {"role": "user", "content": "Immer noch Glückseligkeit."},
         {"role": "assistant", "content": "tiefere_erfahrung"},
     ]
     proposal_options = {
-        1: "Und vielleicht kannst du schauen, wie tief die Erfahrung ist.",
-        2: "Und vielleicht kannst du schauen, ob sie eine Grenze hat.",
-        3: "Und vielleicht kannst du dich ihr ganz hingeben",
-        4: "Und vielleicht kannst du dich ganz in ihr auflösen.",
+        "e3-1": "Und vielleicht kannst du schauen, wie tief die Erfahrung ist.",
+        "e3-2": "Und vielleicht kannst du schauen, ob sie eine Grenze hat.",
+        "e3-3": "Und vielleicht kannst du dich ihr ganz hingeben",
+        "e3-4": "Und vielleicht kannst du dich ganz in ihr auflösen.",
+        "e3-5": "Und du kannst schauen was geschieht, wenn du bei der Glückseligkeit bleibst.",
     }
     print(make_consciousness_proposal(messages, proposal_options, time_period=TimePeriod.ANFANG, debug=True))

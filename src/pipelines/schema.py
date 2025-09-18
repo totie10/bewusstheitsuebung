@@ -238,8 +238,10 @@ class ConsciousnessPrediction(ConsciousnessMessage):
 
 
 class ConsciousnessProposal(BaseModel):
-    vorschlag: int = Field(description=("Der Index des passendsten Vorschlags."))
-    begruendung: str = Field(description=("Kurze Erläuterung (1–3 Sätze), wieso dieser Vorschlag gewählt wurde."))
+    vorschlag: str = Field(
+        pattern=r"^e[0-9]-\d+$", description="Die ID des passendsten Vorschlags (Format: eX-Y, X=1-9, Y=positive Zahl)."
+    )
+    begruendung: str = Field(description="Kurze Erläuterung (1–3 Sätze), wieso dieser Vorschlag gewählt wurde.")
 
 
 class TimePeriod(str, Enum):

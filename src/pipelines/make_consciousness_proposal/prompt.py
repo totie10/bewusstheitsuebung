@@ -15,7 +15,7 @@ def build_schema_description() -> str:
 beschreibung_bewusstheitsvorschlaege = build_schema_description()
 
 
-DOMINANZ_REGELN = (
+DOMINANZ_REGELN_VORSCHLAG = (
     "Dominanz-Regeln (für Auswahl des passendsten Vorschlags):\n"
     "1) Der Vorschlag muss zu dem zuletzt gesagten des Users passen.\n"
     f"2) Es sollte bei Möglichkeit vermieden werden einen Vorschlag, der in einer der beiden letzten Runden gemacht "
@@ -64,8 +64,10 @@ d.h. du wählst einen Vorschlag aus der Bewusstheitsebene {Bewusstheitsebene.TIE
 Wähle nur Vorschläge aus, die auch passend sind. Z.B. wenn der User als letztes davon berichtet, dass er sich
 einer Freude bewusst ist, dann ist ein Vorschlag "Und du kannst vielleicht der Freude den ganzen Raum geben" passend,
 wohingegen ein Vorschlag "Und du kannst vielleicht wahrnehmen, wie sich die Wut in dir ausbreitet" unpassend ist.
-Wenn mehrere Vorschläge passend sind, wähle einen davon aus. Berücksichtige insbesondere die folgenden Dominanz-Regeln:
-{DOMINANZ_REGELN} 
+Wenn mehrere Vorschläge passend sind, wähle einen davon aus. 
+
+Berücksichtige insbesondere die folgenden Dominanz-Regeln:
+{DOMINANZ_REGELN_VORSCHLAG} 
 
 Hier ist eine Übersicht zu den Bewusstheitsebenen:
 {BEWUSSTHEITSEBENEN_BESCHREIBUNG}
