@@ -162,6 +162,25 @@ TIEFE_PRIORITAET: List[Bewusstheitsebene] = [
     Bewusstheitsebene.GEDANKE,  # am "höchsten"/kognitivsten
 ]
 
+
+BEWUSSTHEITSEBENEN_BESCHREIBUNG = (
+    f"- gedanke: Kognitive Inhalte, innere Sätze, Bewertungen, Planen, Vorstellungen oder Erinnerungen. "
+    f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEDANKE])}\n"
+    f"- koerperempfindung: Wahrnehmbare körperliche Empfindungen und Signale. "
+    f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.KOERPEREMPFINDUNG])}\n"
+    f"- aufregung: Erhöhte innere Aktivierung, Nervosität oder energetisches Aufgewühltsein. "
+    f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.AUFREGUNG])}\n"
+    f"- gefuehl: Emotionale Zustände wie Freude, Schmerz, Heiterkeit, Trauer, Wut, Angst, Verzweiflung, Scham oder Ekel. "
+    f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEFUEHL])}\n"
+    f"- sinken: Erleben von in die Tiefe sinken, Fallen, Absacken, Abwärtsbewegung, nicht-körperliche Enge oder Schwere. "
+    f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.SINKEN])}\n"
+    f"- tiefere_erfahrung: Existenzielle oder spirituelle Qualitäten wie Tiefe, Ruhe, Leere, Stille, Frieden, "
+    f"bedingungslose Liebe, Glückseligkeit, Weite oder Verbundenheit. "
+    f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.TIEFERE_ERFAHRUNG])}"
+    f"- unklar: Die komplette Beschreibung ist so ungenau oder unverständlich, dass die Klassifikation in eine"
+    f"der sechs oberen Bewusstheitsebenen nicht möglich ist. "
+)
+
 DOMINANZ_REGELN = (
     "Dominanz-Regeln (für Auswahl der einen dominanten Ebene):\n"
     "1) Zuletzt Gesagtes hat höchstes Gewicht.\n"
@@ -184,21 +203,7 @@ class ConsciousnessLevel(BaseModel):
     bewusstheitsebene: Bewusstheitsebene = Field(
         description=(
             f"Genau eine der sieben Klassen (dominant, siehe Dominanz-Regeln unten):\n"
-            f"- gedanke: Kognitive Inhalte, innere Sätze, Bewertungen, Planen, Vorstellungen oder Erinnerungen. "
-            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEDANKE])}\n"
-            f"- koerperempfindung: Wahrnehmbare körperliche Empfindungen und Signale. "
-            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.KOERPEREMPFINDUNG])}\n"
-            f"- aufregung: Erhöhte innere Aktivierung, Nervosität oder energetisches Aufgewühltsein. "
-            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.AUFREGUNG])}\n"
-            f"- gefuehl: Emotionale Zustände wie Freude, Schmerz, Heiterkeit, Trauer, Wut, Angst, Verzweiflung, Scham oder Ekel. "
-            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.GEFUEHL])}\n"
-            f"- sinken: Erleben von in die Tiefe sinken, Fallen, Absacken, Abwärtsbewegung, nicht-körperliche Enge oder Schwere. "
-            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.SINKEN])}\n"
-            f"- tiefere_erfahrung: Existenzielle oder spirituelle Qualitäten wie Tiefe, Ruhe, Leere, Stille, Frieden, "
-            f"bedingungslose Liebe, Glückseligkeit, Weite oder Verbundenheit. "
-            f"Beispiel-Keywords: {', '.join(BEWUSSTHEITSEBENE_BEISPIELE[Bewusstheitsebene.TIEFERE_ERFAHRUNG])}"
-            f"- unklar: Die komplette Beschreibung ist so ungenau oder unverständlich, dass die Klassifikation in eine"
-            f"der sechs oberen Bewusstheitsebenen nicht möglich ist. "
+            f"{BEWUSSTHEITSEBENEN_BESCHREIBUNG}"
             f"{DOMINANZ_REGELN}"
         )
     )
@@ -230,3 +235,14 @@ class ConsciousnessPrediction(ConsciousnessMessage):
     timestamp: str
     context: List[str]
     vorhergesagte_bewusstheitsebene_dev: ConsciousnessLevel
+
+
+class ConsciousnessProposal(BaseModel):
+    vorschlag: int = Field(description=("Der Index des am besten passendsten Vorschlags."))
+    begruendung: str = Field(description=("Kurze Erläuterung (1–3 Sätze), wieso dieser Vorschlag gewählt wurde. "))
+
+
+class TimePeriod(str, Enum):
+    ANFANG = "anfang"
+    MITTE = "mitte"
+    ENDE = "ende"

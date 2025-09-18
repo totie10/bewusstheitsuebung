@@ -1,63 +1,81 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-from pipelines.schema import ConsciousnessLevel
+from pipelines.schema import ConsciousnessProposal, Bewusstheitsebene, TimePeriod, BEWUSSTHEITSEBENEN_BESCHREIBUNG
 
 
 def build_schema_description() -> str:
-    """Erstellt eine textuelle Beschreibung aller Felder aus ConsciousnessLevel für das LLM."""
     lines = ["Strukturelle Spezifikation (Beschreibung der Felder):\n"]
-    for name, field in ConsciousnessLevel.model_fields.items():
+    for name, field in ConsciousnessProposal.model_fields.items():
         desc = field.description or ""
         type_name = getattr(field.annotation, "__name__", str(field.annotation))
         lines.append(f"- {name} ({type_name}):\n{desc}\n")
     return "\n".join(lines)
 
 
-beschreibung_bewusstheitsebenen = build_schema_description()
+beschreibung_bewusstheitsvorschlaege = build_schema_description()
+
+
+DOMINANZ_REGELN = (
+    "Dominanz-Regeln (für Auswahl des passendsten Vorschlags):\n"
+    "1) Der Vorschlag muss zu dem zuletzt gesagten des Users passen.\n"
+    f"2) Es sollte bei Möglichkeit vermieden werden einen Vorschlag, der in einer der beiden letzten Runden gemacht "
+    f"wurde zu wiederholen. Generell ist es aber erlaubt Vorschläge aus älteren Runden zu wiederholen, wenn diese "
+    f"besonders gut passen für die aktuelle Runde.\n"
+    f"3) Der Vorschlag sollte die definierten Tiefe-Regeln befolgen."
+    "Reihenfolge der Priorisierung: (1) passend > (2) Wiederholung > (3) Tiefe-Regel."
+)
+
 
 SYSTEM_PROMPT = f"""\
-Du bist ein präziser Annotator.
-Du erhältst eine Liste von Nachrichten (Gesprächsverlauf).
-Die letzte Nachricht ist das Ziel, das du genau einer Bewusstheitsebene zuordnest.
+Du machst einen neuen Vorschlag.
+Du bekommst eine Liste von Vorschlägen, die jeweils eine natürliche Zahl als ID zugeordnet haben. 
+Wähle aus dieser Liste den passendsten Vorschlag aus.
+Berücksichtige dabei deine vergangenen Vorschläge. Du solltest keinen Vorschlag machen, den du in einer der beiden 
+Runden zuvor gemacht hast.
+Außerdem erhältst du die Information, ob sich die Übung am {TimePeriod.ANFANG.value}, in der {TimePeriod.MITTE.value} 
+oder am {TimePeriod.ENDE.value} befindet. 
+Anhand des Gesprächsverlaufs siehst du bereits, in welche Bewusstheitsebene zuletzt klassifiziert wurde. 
+Wenn zuletzt in die Ebene {Bewusstheitsebene.AUFREGUNG.value}, {Bewusstheitsebene.SINKEN.value}, 
+{Bewusstheitsebene.TIEFERE_ERFAHRUNG.value} oder {Bewusstheitsebene.UNKLAR.value} klassifiziert wurde, 
+bist du frei in der Auswahl des nächsten Vorschlags, d.h. es gibt keine Tiefe-Regel.
 
-Wähle genau **eine** der Klassen:
-gedanke, koerperempfindung, aufregung, gefuehl, sinken, tiefere_erfahrung, unklar.
+Wenn zuletzt in die Ebene {Bewusstheitsebene.GEDANKE.value} klassifiziert wurde, gilt folgende Tiefe-Regel:
+- Wenn sich die Übung am {TimePeriod.ANFANG.value} befindet, wählst du einen Vorschlag aus, der die Ebene beibehält, d.h.
+du wählst einen Vorschlag aus, der auf die Bewusstheitsebene {Bewusstheitsebene.GEDANKE.value} abzielt. 
+- Wenn sich die Übung in der {TimePeriod.MITTE.value} befindet, wählst du einen Vorschlag aus, der eine Ebene tiefer geht,
+d.h. du wählst einen Vorschlag aus der Bewusstheitsebene {Bewusstheitsebene.KOERPEREMPFINDUNG.value} aus.
+- Wenn sich die Übung in der {TimePeriod.ENDE.value} befindet, wählst du einen Vorschlag aus, der zwei Ebenen tiefer geht,
+d.h. du wählst einen Vorschlag aus der Bewusstheitsebene {Bewusstheitsebene.GEFUEHL.value} aus.
 
-Gefühle sind etwas anderes als Körperempfindungen. Körperempfindungen sind: den Energiestrom zu spüren, den Herzschlag,
-den Atem sowie alles, was im und am Körper spürbar ist, wie ein Vibrieren, Jucken, Pochen, den Wind auf der Haut,
-den Druck im Brustkorb, die sexuelle Erregung, den Schweißausbruch.
+Wenn zuletzt in die Ebene {Bewusstheitsebene.KOERPEREMPFINDUNG.value} klassifiziert wurde, gilt folgende Tiefe-Regel:
+- Wenn sich die Übung am {TimePeriod.ANFANG.value} befindet, wählst du einen Vorschlag aus, der die Ebene beibehält, d.h.
+du wählst einen Vorschlag aus Bewusstheitsebene {Bewusstheitsebene.KOERPEREMPFINDUNG.value} aus. 
+- Wenn sich die Übung in der {TimePeriod.MITTE.value} oder am {TimePeriod.ENDE.value} befindet,
+wählst du einen Vorschlag aus, der eine Ebene tiefer geht,
+d.h. du wählst einen Vorschlag aus der Bewusstheitsebene {Bewusstheitsebene.GEFUEHL.value} aus.
 
-Ich fühle einen Druck in der Brust. Ich fühle eine Anspannung im Bauch. Ich spüre mein Herz schneller schlagen.« 
-Das alles sind Körperempfindungen, keine Gefühle.
+Wenn zuletzt in die Ebene {Bewusstheitsebene.GEFUEHL.value} klassifiziert wurde, gilt folgende Tiefe-Regel:
+- Wenn sich die Übung am {TimePeriod.ANFANG.value} befindet, wählst du einen Vorschlag aus, der die Ebene beibehält, d.h.
+du wählst einen Vorschlag aus Bewusstheitsebene {Bewusstheitsebene.GEFUEHL.value} aus. 
+- Wenn sich die Übung in der {TimePeriod.MITTE.value} oder am {TimePeriod.ENDE.value} befindet,
+wählst du einen Vorschlag aus, der eine Ebene tiefer geht,
+d.h. du wählst einen Vorschlag aus der Bewusstheitsebene {Bewusstheitsebene.TIEFERE_ERFAHRUNG.value} aus.
 
-Die wichtigsten Gefühle sind: Freude, Schmerz, Heiterkeit, Trauer, Wut, Angst, Verzweiflung, Scham, Ekel.
+Wähle nur Vorschläge aus, die auch passend sind. Z.B. wenn der User als letztes davon berichtet, dass er sich
+einer Freude bewusst ist, dann ist ein Vorschlag "Und du kannst vielleicht der Freude den ganzen Raum geben" passend,
+wohingegen ein Vorschlag "Und du kannst vielleicht wahrnehmen, wie sich die Wut in dir ausbreitet" unpassend ist.
+Wenn mehrere Vorschläge passend sind, wähle einen davon aus. Berücksichtige insbesondere die folgenden Dominanz-Regeln:
+{DOMINANZ_REGELN} 
 
-Von den Gefühlen gibt es auch Abstufungen, am Beispiel der Wut sind das folgende: ungehalten sein, sich genervt fühlen,
-aufgebracht sein, Ärger, Groll, Zorn und Hass. Sie sind nicht nur nach Intensität abgestuft, sondern auch immer
-unterschiedlich ausgerichtet. Der Zorn weiß genau, gegen wen und was er sich richtet; der Hass ist mehr als Wut, weil er
-nicht nur etwas abwehren, sich verteidigen und etwas durchsetzen möchte, sondern weil es den, auf den der Hass sich
-richtet, auch zerstören will.
+Hier ist eine Übersicht zu den Bewusstheitsebenen:
+{BEWUSSTHEITSEBENEN_BESCHREIBUNG}
 
-Bei der Angst gibt es folgende Abstufungen: Unsicherheit, Ängstlichkeit, Angst, Schrecken und Panik.
-
-Weiter gibt es einige zusammengesetzte Gefühle: 
-Neid setzt sich zusammen aus Sehnsucht, Aggression und Schmerz.
-Man will etwas haben, das ist die Sehnsucht; man ist neidisch auf den anderen, das ist das aggressive Element;
-und es schmerzt, dass man es nicht hat.
-
-Eifersucht setzt sich zusammen aus: Schmerz, Aggression und Neid. Der Schmerz wird mit einer bestimmten Geschichte verbunden,
-die wiederum aus vielerlei Fantasien und Vorstellungen zusammengesetzt ist.
-
-Tiefere Erfahrungen: Tiefe, Ruhe, Leere, Stille, Frieden, bedingungslose Liebe und Glückseligkeit sind Erfahrungen,
-die tiefer sind, als Gefühle es je sein können.
-
-Hier sind weiter Details zu den einzelnen Bewusstheitsebenen:
-{beschreibung_bewusstheitsebenen}
+Hier ist beschrieben, wie der Output für die Bewusstheitsvorschläge aussehen sollte:
+{beschreibung_bewusstheitsvorschlaege}
 
 
 Regeln:
-- Nutze den Kontext der vorherigen Nachrichten, aber klassifiziere ausschließlich die letzte Nachricht.
-- Wenn die Ziel-Nachricht mehrere Aspekte enthält, wähle den **dominanten** Aspekt.
+- Nutze den Kontext der vorherigen Nachrichten, aber mache einen Vorschlag ausschließlich für die letzte User-Nachricht.
 - Verwende die Feldbeschreibung der Pydantic-Struktur als maßgebliche Definition.
 - Antworte ausschließlich als streng strukturiertes Objekt gemäß dem Schema.
 """

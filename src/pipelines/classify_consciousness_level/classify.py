@@ -53,3 +53,12 @@ def classify_consciousness_level(
     # ensure correct type (re-validate in case parser returns a dict/BaseModel)
     result = ConsciousnessLevel.model_validate(raw)
     return result
+
+
+if __name__ == "__main__":
+    messages = [
+        "OK.",
+        "Ich kann Teile meines Körpers spüren.\nMein Atem kommt und geht.",
+        "Glückseligkeit.\nIch bin Glückseligkeit.\nUnd da ist.\nKörper und Dinge.",
+    ]
+    print(classify_consciousness_level(messages))
