@@ -181,7 +181,7 @@ BEWUSSTHEITSEBENEN_BESCHREIBUNG = (
     f"der sechs oberen Bewusstheitsebenen nicht möglich ist. "
 )
 
-DOMINANZ_REGELN = (
+DOMINANZ_REGELN_KLASSIFIKATION = (
     "Dominanz-Regeln (für Auswahl der einen dominanten Ebene):\n"
     "1) Zuletzt Gesagtes hat höchstes Gewicht.\n"
     f"2) Tiefere Ebene hat höheres Gewicht als eine höhere Ebene (Tiefe-Hierarchie: "
@@ -204,7 +204,7 @@ class ConsciousnessLevel(BaseModel):
         description=(
             f"Genau eine der sieben Klassen (dominant, siehe Dominanz-Regeln unten):\n"
             f"{BEWUSSTHEITSEBENEN_BESCHREIBUNG}"
-            f"{DOMINANZ_REGELN}"
+            f"{DOMINANZ_REGELN_KLASSIFIKATION}"
         )
     )
 
@@ -238,8 +238,8 @@ class ConsciousnessPrediction(ConsciousnessMessage):
 
 
 class ConsciousnessProposal(BaseModel):
-    vorschlag: int = Field(description=("Der Index des am besten passendsten Vorschlags."))
-    begruendung: str = Field(description=("Kurze Erläuterung (1–3 Sätze), wieso dieser Vorschlag gewählt wurde. "))
+    vorschlag: int = Field(description=("Der Index des passendsten Vorschlags."))
+    begruendung: str = Field(description=("Kurze Erläuterung (1–3 Sätze), wieso dieser Vorschlag gewählt wurde."))
 
 
 class TimePeriod(str, Enum):

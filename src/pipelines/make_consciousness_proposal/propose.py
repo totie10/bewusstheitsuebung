@@ -4,11 +4,19 @@ from typing import List, Dict
 
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from pipelines.classify_consciousness_level.prompt import prompt
+from pipelines.make_consciousness_proposal.prompt import SYSTEM_PROMPT
 from pipelines.schema import ConsciousnessProposal, TimePeriod
 
 DEFAULT_MODEL = "gemini-2.0-flash-lite-001"
 logger = logging.getLogger("uvicorn.error")  # shows up in Cloud Run logs
+
+
+def format_proposal_options(proposal_options: dict[int, str]) -> str:
+    """Erzeugt eine klar lesbare Liste für das LLM."""
+    lines = []
+    for k, v in sorted(proposal_options.items(), key=lambda x: x[0]):
+        lines.append(f"{k}. {v}")
+    return "\n".join(lines)
 
 
 def make_consciousness_proposal(
@@ -16,6 +24,7 @@ def make_consciousness_proposal(
     proposal_options: Dict[int, str],
     time_period: TimePeriod,
     model_name: str = DEFAULT_MODEL,
+    debug: bool = False,
 ) -> ConsciousnessProposal:
     """
     Nutzt die gesamte Nachrichtenliste als Kontext, klassifiziert aber nur die letzte Nachricht.
@@ -32,11 +41,26 @@ def make_consciousness_proposal(
     llm = ChatGoogleGenerativeAI(model=model_name, api_key=api_key)
     structured_llm = llm.with_structured_output(ConsciousnessProposal)
 
-    # run chain
-    chain = prompt | structured_llm
-    raw = chain.invoke({"messages": messages, "proposal_options": proposal_options})
+    # System-Prompt + deine Messages direkt
+    messages_with_system = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        *messages,
+        {
+            "role": "user",
+            "content": (
+                f"Zeitabschnitt der Übung: {time_period.value}\n\n"
+                f"Hier sind die möglichen Vorschläge:\n"
+                f"{format_proposal_options(proposal_options)}\n\n"
+                "Wähle die am besten passende Option (nur eine!) "
+                "und antworte gemäß der Schema-Definition."
+            ),
+        },
+    ]
 
-    # ensure correct type (re-validate in case parser returns a dict/BaseModel)
+    if debug:
+        print(messages_with_system)
+
+    raw = structured_llm.invoke(messages_with_system)
     result = ConsciousnessProposal.model_validate(raw)
     return result
 
@@ -44,10 +68,13 @@ def make_consciousness_proposal(
 if __name__ == "__main__":
     messages = [
         {"role": "user", "content": "Ich kann Teile meines Körpers spüren.\nMein Atem kommt und geht."},
-        {"role": "tool", "content": "koerperempfindung"},
+        {"role": "assistant", "content": "koerperempfindung"},
         {"role": "assistant", "content": "Und du brauchst nichts damit zu tun."},
         {"role": "user", "content": "Glückseligkeit.\nIch bin Glückseligkeit.\nUnd da ist.\nKörper und Dinge."},
-        {"role": "tool", "content": "tiefere_erfahrung"},
+        {"role": "assistant", "content": "tiefere_erfahrung"},
+        {"role": "assistant", "content": "Und vielleicht kannst du schauen, wie tief die Erfahrung ist."},
+        {"role": "user", "content": "Immer noch Glückseligkeit."},
+        {"role": "assistant", "content": "tiefere_erfahrung"},
     ]
     proposal_options = {
         1: "Und vielleicht kannst du schauen, wie tief die Erfahrung ist.",
@@ -55,3 +82,4 @@ if __name__ == "__main__":
         3: "Und vielleicht kannst du dich ihr ganz hingeben",
         4: "Und vielleicht kannst du dich ganz in ihr auflösen.",
     }
+    print(make_consciousness_proposal(messages, proposal_options, time_period=TimePeriod.ANFANG, debug=True))
