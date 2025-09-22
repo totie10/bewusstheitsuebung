@@ -1,7 +1,9 @@
+import re
+import warnings
 from enum import Enum
 from typing import Dict, List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class Bewusstheitsebene(str, Enum):
@@ -237,11 +239,35 @@ class ConsciousnessPrediction(ConsciousnessMessage):
     vorhergesagte_bewusstheitsebene_dev: ConsciousnessLevel
 
 
+VORSCHLAG_PATTERN = re.compile(r"^e[1-9]-\d+$")
+
+
 class ConsciousnessProposal(BaseModel):
-    vorschlag: str = Field(
-        pattern=r"^e[0-9]-\d+$", description="Die ID des passendsten Vorschlags (Format: eX-Y, X=1-9, Y=positive Zahl)."
+    vorschlaege: List[str] = Field(
+        description=(
+            "Liste der IDs der passendsten Vorschläge. "
+            "Jede ID muss das Format eX-Y haben (X=1–9, Y=positive Zahl). "
+            "Maximal drei Vorschläge sind erlaubt – falls mehr übergeben werden, "
+            "werden sie abgeschnitten."
+        )
     )
-    begruendung: str = Field(description="Kurze Erläuterung (1–3 Sätze), wieso dieser Vorschlag gewählt wurde.")
+    begruendung: str = Field(description="Kurze Erläuterung (1–3 Sätze), wieso diese Vorschläge gewählt wurden.")
+
+    @field_validator("vorschlaege")
+    def validate_and_truncate_vorschlaege(cls, v: List[str]) -> List[str]:
+        # Regex check
+        for item in v:
+            if not VORSCHLAG_PATTERN.match(item):
+                raise ValueError(f"Ungültige Vorschlags-ID '{item}', erwartet Format eX-Y (z.B. e3-5).")
+        # Truncate with warning if too long
+        if len(v) > 3:
+            warnings.warn(
+                f"Zu viele Vorschläge ({len(v)} erhalten) – die Liste wird auf die ersten 3 gekürzt.",
+                UserWarning,
+                stacklevel=2,
+            )
+            v = v[:3]
+        return v
 
 
 class TimePeriod(str, Enum):

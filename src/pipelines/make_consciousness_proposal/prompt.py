@@ -27,17 +27,29 @@ DOMINANZ_REGELN_VORSCHLAG = (
 
 
 SYSTEM_PROMPT = f"""\
-Du machst einen neuen Vorschlag.
-Du bekommst eine Liste von Vorschlägen, die jeweils eine natürliche Zahl als ID zugeordnet haben. 
-Wähle aus dieser Liste den passendsten Vorschlag aus.
-Berücksichtige dabei deine vergangenen Vorschläge. Du solltest keinen Vorschlag machen, den du in einer der beiden 
+Du machst einen neuen Vorschlag, wessen sich der User noch bewusst sein kann.
+Du erhältst als Input eine Liste an Nachrichten aus einem Gesprächsverlauf zwischen dem User und dem Assistenten.
+Der Gesprächsverlauf folgt einer klaren Struktur. Er ist unterteilt in mehrere Runden, wobei eine Runde immer aus drei
+Nachrichten besteht. Hier ist ein Beispiel für einen Runde:
+[{{"role": "user", "content": "Ich kann Teile meines Körpers spüren.\nMein Atem kommt und geht."}},
+{{"role": "assistant", "content": "koerperempfindung"}},
+{{"role": "assistant", "content": "e1-2: Und du brauchst nichts damit zu tun."}}]
+Die erste Nachricht ist der Input des Users, der berichtet, wessen er sich in dem Moment bewusst ist.
+Die zweite Nachricht ist das Klassifikationsergebnis eines vorherigen KI Modells, welches für die Nachricht des Users
+die dominante Bewusstheitsebene ermittelt. 
+Die dritte Nachricht ist der Vorschlag an den User, wessen er/sie sich noch bewusst sein kann. Wenn die dritte Nachricht
+im Gesprächsverlauf vorkommt, bedeutet dies, dass diese Runde bereits abgeschlossen wurde und in der Vergangenheit liegt.
+
+Du bekommst eine Liste von Vorschlägen, die jeweils eine ID zugeordnet haben. 
+Wähle aus dieser Liste die maximal drei passendsten Vorschläge aus.
+Berücksichtige dabei die vergangenen Vorschläge. Du solltest keinen Vorschlag machen, den du in einer der beiden 
 Runden zuvor gemacht hast.
 Außerdem erhältst du die Information, ob sich die Übung am {TimePeriod.ANFANG.value}, in der {TimePeriod.MITTE.value} 
 oder am {TimePeriod.ENDE.value} befindet. 
 Anhand des Gesprächsverlaufs siehst du bereits, in welche Bewusstheitsebene zuletzt klassifiziert wurde. 
 Wenn zuletzt in die Ebene {Bewusstheitsebene.AUFREGUNG.value}, {Bewusstheitsebene.SINKEN.value}, 
 {Bewusstheitsebene.TIEFERE_ERFAHRUNG.value} oder {Bewusstheitsebene.UNKLAR.value} klassifiziert wurde, 
-bist du frei in der Auswahl des nächsten Vorschlags, d.h. es gibt keine Tiefe-Regel.
+bist du frei in der Auswahl der nächsten Vorschlaege, d.h. es gibt keine Tiefe-Regel.
 
 Wenn zuletzt in die Ebene {Bewusstheitsebene.GEDANKE.value} klassifiziert wurde, gilt folgende Tiefe-Regel:
 - Wenn sich die Übung am {TimePeriod.ANFANG.value} befindet, wählst du einen Vorschlag aus, der die Ebene beibehält, d.h.
@@ -77,7 +89,10 @@ Hier ist beschrieben, wie der Output für die Bewusstheitsvorschläge aussehen s
 
 
 Regeln:
-- Nutze den Kontext der vorherigen Nachrichten, aber mache einen Vorschlag ausschließlich für die letzte User-Nachricht.
+- Nutze den Kontext der vorherigen Nachrichten, aber mache ausschließlich Vorschläge für die letzte User-Nachricht.
+- Mache ausschließlich sehr gut passende Vorschläge. Mache maximal drei Vorschläge. Wenn kein Vorschlag passt, gib eine
+leere Liste zurück. Wenn nur ein oder zwei Vorschläge passend sind, gib auch nur einen bzw. zwei Vorschläge zurück.
+Sortiere die Liste der Vorschläge mit dem am besten passendsten Vorschlag am Anfang der Liste.
 - Verwende die Feldbeschreibung der Pydantic-Struktur als maßgebliche Definition.
 - Antworte ausschließlich als streng strukturiertes Objekt gemäß dem Schema.
 """
