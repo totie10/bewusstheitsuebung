@@ -51,7 +51,7 @@ def make_consciousness_proposal(
                 f"Zeitabschnitt der Übung: {time_period.value}\n\n"
                 f"Hier sind die möglichen Vorschläge:\n"
                 f"{format_proposal_options(proposal_options)}\n\n"
-                "Wähle die am besten passende Option (nur eine!) "
+                "Wähle die am besten passendsten Optionen (maximal drei!) "
                 "und antworte gemäß der Schema-Definition."
             ),
         },
@@ -66,6 +66,8 @@ def make_consciousness_proposal(
 
 
 if __name__ == "__main__":
+    import re
+
     messages = [
         {"role": "user", "content": "Ich kann Teile meines Körpers spüren.\nMein Atem kommt und geht."},
         {"role": "assistant", "content": "koerperempfindung"},
@@ -76,14 +78,30 @@ if __name__ == "__main__":
             "role": "assistant",
             "content": "e3-5: Und du kannst schauen was geschieht, wenn du bei der Glückseligkeit bleibst.",
         },
-        {"role": "user", "content": "Immer noch Glückseligkeit."},
-        {"role": "assistant", "content": "tiefere_erfahrung"},
+        {"role": "user", "content": "Da ist Freude."},
+        {"role": "assistant", "content": "gefuehl"},
     ]
-    proposal_options = {
-        "e3-1": "Und vielleicht kannst du schauen, wie tief die Erfahrung ist.",
-        "e3-2": "Und vielleicht kannst du schauen, ob sie eine Grenze hat.",
-        "e3-3": "Und vielleicht kannst du dich ihr ganz hingeben",
-        "e3-4": "Und vielleicht kannst du dich ganz in ihr auflösen.",
-        "e3-5": "Und du kannst schauen was geschieht, wenn du bei der Glückseligkeit bleibst.",
-    }
-    print(make_consciousness_proposal(messages, proposal_options, time_period=TimePeriod.ANFANG, debug=True))
+
+    # Your transcripts folder
+    FOLDER = r"C:\Users\tobia\OneDrive\Dokumente\Christian Meyer\transcripts\transcripts"
+
+    # Regex to match files like e2-1.txt, e2-42.txt ...
+    pattern = re.compile(r"^(e2-\d+)\.txt$")
+
+    proposal_options = {}
+
+    for filename in os.listdir(FOLDER):
+        match = pattern.match(filename)
+        if match:
+            proposal_id = match.group(1)  # e.g. "e2-5"
+            file_path = os.path.join(FOLDER, filename)
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read().strip()
+            proposal_options[proposal_id] = text
+
+    # Optional: sort dictionary by key (so proposals are in natural order)
+    proposal_options = dict(sorted(proposal_options.items(), key=lambda kv: int(kv[0].split("-")[1])))
+
+    print(proposal_options)
+
+    print(make_consciousness_proposal(messages, proposal_options, time_period=TimePeriod.ENDE, debug=True))
