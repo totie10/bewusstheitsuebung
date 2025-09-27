@@ -34,17 +34,11 @@ def classify_consciousness_level(
     context_text = "\n".join(f"- {m.strip()}" for m in messages[:-1])
     target_text = messages[-1].strip()
 
-    # --- show exact prompt sent to the model ---
-    if debug:
-        formatted_msgs = prompt.format_messages(
-            context_text=context_text,
-            target_text=target_text,
-        )
-        print("\n====== PROMPT DEBUG (exact messages sent) ======")
-        for m in formatted_msgs:
-            # m.type is typically "system" / "human" / "ai"
-            print(f"\n--- {m.type.upper()} ---\n{m.content}")
-        print("====== END PROMPT DEBUG ======\n")
+    formatted_msgs = prompt.format_messages(
+        context_text=context_text,
+        target_text=target_text,
+    )
+    logger.info(formatted_msgs)
 
     # run chain
     chain = prompt | structured_llm
@@ -52,6 +46,7 @@ def classify_consciousness_level(
 
     # ensure correct type (re-validate in case parser returns a dict/BaseModel)
     result = ConsciousnessLevel.model_validate(raw)
+    logger.info(result)
     return result
 
 

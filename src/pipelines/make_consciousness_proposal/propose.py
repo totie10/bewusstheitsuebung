@@ -60,6 +60,7 @@ def make_consciousness_proposal(
 
     raw = structured_llm.invoke(messages_with_system)
     result = ConsciousnessProposal.model_validate(raw)
+    logger.info(result)
     return result
 
 
