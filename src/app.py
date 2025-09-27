@@ -1,12 +1,13 @@
 import logging
-from typing import List
+from typing import List, Dict
 
 from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from pipelines.classify_consciousness_level.classify import classify_consciousness_level
-from pipelines.schema import ConsciousnessLevel
+from pipelines.make_consciousness_proposal.propose import make_consciousness_proposal
+from pipelines.schema import ConsciousnessLevel, TimePeriod, ConsciousnessProposal
 
 app = FastAPI(title="Bewusstheitsuebung API")
 logger = logging.getLogger("uvicorn.error")  # Uvicorn's logger
@@ -25,6 +26,14 @@ class ClassifyRequest(BaseModel):
     messages: List[str] = Field(..., description="Conversation history; last item is target.")
 
 
+class ProposeRequest(BaseModel):
+    messages: List[Dict[str, str]] = Field(..., description="Conversation history; last user message is target.")
+    proposal_options: Dict[str, str] = Field(
+        ..., description="All possible proposals from last classified consciousness level."
+    )
+    time_period: TimePeriod = Field(..., description="Current time period of consciousness exercise.")
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -38,6 +47,17 @@ def classify(req: ClassifyRequest):
         raise
     except Exception as e:
         logger.exception("Unhandled error in /classify: %s", e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+
+
+@app.post("/propose", response_model=ConsciousnessProposal, status_code=status.HTTP_200_OK)
+def propose(req: ProposeRequest):
+    try:
+        return make_consciousness_proposal(req.messages, req.proposal_options, req.time_period)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception("Unhandled error in /propose: %s", e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 

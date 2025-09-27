@@ -24,7 +24,6 @@ def make_consciousness_proposal(
     proposal_options: Dict[str, str],
     time_period: TimePeriod,
     model_name: str = DEFAULT_MODEL,
-    debug: bool = False,
 ) -> ConsciousnessProposal:
     """
     Nutzt die gesamte Nachrichtenliste als Kontext, klassifiziert aber nur die letzte Nachricht.
@@ -57,8 +56,7 @@ def make_consciousness_proposal(
         },
     ]
 
-    if debug:
-        print(messages_with_system)
+    logger.info(messages_with_system)
 
     raw = structured_llm.invoke(messages_with_system)
     result = ConsciousnessProposal.model_validate(raw)
@@ -104,4 +102,4 @@ if __name__ == "__main__":
 
     print(proposal_options)
 
-    print(make_consciousness_proposal(messages, proposal_options, time_period=TimePeriod.ENDE, debug=True))
+    print(make_consciousness_proposal(messages, proposal_options, time_period=TimePeriod.ENDE))
